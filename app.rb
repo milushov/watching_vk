@@ -10,7 +10,7 @@ set :state_file, "#{settings.root}/state.json"
 set :js_file, 'http://vk.com/js/loader_nav0_0.js'
 set :js_base, 'http://vk.me/js/al/'
 set :css_base, 'http://vk.me/css/al/'
-set :vk_files_path, './files'
+set :vk_files_path, './vk_files'
 
 get '/' do
   'this page should contain some stats from db'
