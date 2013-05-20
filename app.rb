@@ -1,18 +1,23 @@
 %w(sinatra git execjs pry open-uri awesome_print json).each(&method(:require))
 
+set :dev, true
+set :types, %w( js css )
+
 set :root, File.dirname(__FILE__)
+set :password, ENV['WATCHING_FILES_APP_PASSWORD']
 set :state_file, "#{settings.root}/state.json"
 
 set :js_file, 'http://vk.com/js/loader_nav0_0.js'
 set :js_base, 'http://vk.me/js/al/'
 set :css_base, 'http://vk.me/css/al/'
-set :dev, true
 
 get '/' do
   'this page should contain some stats from db'
 end
 
-get '/dance_for_me!' do
+get '/dance_for_me/:password' do
+  #redirect '/' unless settings.password == params['password']
+
   files = get_files
   last_state = get_last_state
 
@@ -37,7 +42,14 @@ end
 
 helpers do
   def save_to_git new_files
-    #'whet'
+    new_files.map! do |arr|
+      file_name = arr.first
+      type = settings.types.select{ |type| file_name.match(/\.(#{type})$/) }.first
+      base = settings.send "#{type}_base".to_sym
+      base + file_name
+    end
+
+    system "wget -P ./vk_files #{new_files.join(' ')}"
   end
 
   def get_files
@@ -46,16 +58,18 @@ helpers do
     context = ExecJS.compile(js_code + helper_js_function)
     files = context.call 'getStVersions'
 
+    regex = /\.(#{ settings.types.join('|' ) })$/
+
     watching_files = {}; files.each do |file|
       name = file.first
       version = file.last
 
-      if name.match(/\.(js|css)$/)
+      if name.match regex
         watching_files[name] = version
       end
     end
 
-    watching_files.merge!({'common.js' => 100500}) if settings.dev
+    watching_files.merge!({'common.js' => 100500}) if settings.dev == true
 
     watching_files
   end

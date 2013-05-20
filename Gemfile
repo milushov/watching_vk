@@ -8,3 +8,4 @@ gem 'execjs'
 gem 'pry'
 gem 'awesome_print'
 gem 'rerun'
+gem 'whenever', require: false
