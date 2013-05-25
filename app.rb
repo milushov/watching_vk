@@ -50,9 +50,12 @@ helpers do
       base + file_name
     end
 
+    time = Time.now.strftime "%e.%m.%Y %-k:%M"
+
     system "cd #{settings.vk_files_path}"
     system "wget #{new_files.join(' ')}"
-    system %(git commit -am "#{123.to_s}")
+    commit_message = "#{time} new files: #{new_files.count}"
+    system "git commit -am '#{commit_message}'"
   end
 
   def get_files
