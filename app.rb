@@ -4,13 +4,13 @@ set :dev, true
 set :types, %w( js css )
 
 set :root, File.dirname(__FILE__)
-set :password, ENV['WATCHING_FILES_APP_PASSWORD']
+set :password, ENV['WATCHING_VK_PASSWORD']
 set :state_file, "#{settings.root}/state.json"
 
 set :js_file, 'http://vk.com/js/loader_nav0_0.js'
 set :js_base, 'http://vk.me/js/al/'
 set :css_base, 'http://vk.me/css/al/'
-set :vk_files_path, './vk_files'
+set :vk_files_path, '../watching_vk_files/'
 
 get '/' do
   'this page should contain some stats from db'
@@ -50,7 +50,9 @@ helpers do
       base + file_name
     end
 
-    system "wget -P #{settings.vk_files_path} #{new_files.join(' ')}"
+    system "cd #{settings.vk_files_path}"
+    system "wget #{new_files.join(' ')}"
+    system %(git commit -am "#{123.to_s}")
   end
 
   def get_files
