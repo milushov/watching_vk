@@ -22,21 +22,21 @@ get '/dance_for_me/:password' do
   files = get_files
   last_state = get_last_state
 
-  unless last_state.empty?
-    #binding.pry
+  if last_state.empty?
+    set_last_state files
+    'last state is empty'
+  else
     new_files = files.to_a - last_state.to_a
 
-    unless new_files.empty?
+    if new_files.empty?
+      'new files is empty'
+    else
       set_last_state files
       #save_updates new_files
       save_to_git new_files
+
       new_files.to_s
-    else
-      'new_files is empty'
     end
-  else
-    set_last_state files
-    'nope'
   end
 
 end
@@ -50,12 +50,16 @@ helpers do
       base + file_name
     end
 
-    time = Time.now.strftime "%e.%m.%Y %-k:%M"
-
-    system "cd #{settings.vk_files_path}"
-    system "wget #{new_files.join(' ')}"
+    time = Time.now.strftime "%e.%m.%Y %-k:%M:%S"
     commit_message = "#{time} new files: #{new_files.count}"
-    system "git commit -am '#{commit_message}'"
+
+    cd = "cd #{settings.vk_files_path}"
+    wget = "wget #{new_files.join(' ')}"
+    git = "git add . ; git commit -m '#{commit_message}'; git push origin master"
+
+    status = system "#{cd}; #{wget}; #{git};"
+
+    puts 'changes have been pushed to github!' if status
   end
 
   def get_files
@@ -75,7 +79,9 @@ helpers do
       end
     end
 
-    watching_files.merge!({'common.js' => 100500}) if settings.dev == true
+    key = watching_files.keys.sample
+    val = rand 500..100500
+    watching_files.merge!({key => val}) if settings.dev == true
 
     watching_files
   end
