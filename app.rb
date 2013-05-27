@@ -1,16 +1,20 @@
 %w(sinatra git execjs pry open-uri awesome_print json).each(&method(:require))
 
 set :dev, false
-set :types, %w( js css )
+set :types, %w(js css)
 
 set :root, File.dirname(__FILE__)
 set :password, ENV['WATCHING_VK_PASSWORD']
 set :state_file, "#{settings.root}/state.json"
 
 set :js_file, 'http://vk.com/js/loader_nav0_0.js'
-set :js_base, 'http://vk.me/js/al/'
-set :css_base, 'http://vk.me/css/al/'
+set :base, 'http://vk.me'
 set :vk_files_path, '../watching_vk_files/'
+set :paths, {
+  '' => %w(mentions.js apps_flash.js map2.js map.css paginated_table.js paginated_table.css ui_controls.css touch.css),
+  'lib' => %w(selects.js maps.js sort.js ui_controls.js),
+  'api' => %w(oauth_popup.css oauth_page.css oauth_touch.css)
+}
 
 get '/' do
   'this page should contain some stats from db'
@@ -45,9 +49,10 @@ helpers do
   def save_to_git new_files
     new_files.map! do |arr|
       file_name = arr.first
+      base = settings.base
       type = settings.types.select{ |type| file_name.match(/\.(#{type})$/) }.first
-      base = settings.send "#{type}_base".to_sym
-      base + file_name
+      path = (paths = settings.paths.select{|_, files| files.include? file_name }).empty? ? 'al' : paths.keys.first
+      File.join base, type, path, file_name
     end
 
     time = Time.now.strftime "%e.%m.%Y %-k:%M:%S"
@@ -79,9 +84,11 @@ helpers do
       end
     end
 
-    key = watching_files.keys.sample
-    val = rand 500..100500
-    watching_files.merge!({key => val}) if settings.dev == true
+    if settings.dev == true
+      key = %w(mentions.js selects.js oauth_popup.css).sample
+      val = rand 500..100500
+      watching_files.merge!({key => val})
+    end
 
     watching_files
   end
