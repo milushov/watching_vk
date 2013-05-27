@@ -1,6 +1,6 @@
 %w(sinatra git execjs pry open-uri awesome_print json).each(&method(:require))
 
-set :dev, true
+set :dev, false
 set :types, %w( js css )
 
 set :root, File.dirname(__FILE__)
