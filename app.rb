@@ -64,11 +64,12 @@ helpers do
     time = Time.now.strftime "%e.%m.%Y %-k:%M:%S"
     commit_message = "#{time} new files: #{new_files.count}"
 
+    hack = 'source ~/.bashrc'
     cd = "cd #{settings.vk_files_path}"
     wget = "wget -N #{new_files.join(' ')}"
     git = "git add . ; git commit -m '#{commit_message}'; git push origin master"
 
-    system "#{cd}; #{wget}; #{git};"
+    system "#{hack}; #{cd}; #{wget}; #{git};"
   end
 
   def get_files
