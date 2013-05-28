@@ -59,7 +59,7 @@ helpers do
     commit_message = "#{time} new files: #{new_files.count}"
 
     cd = "cd #{settings.vk_files_path}"
-    wget = "wget #{new_files.join(' ')}"
+    wget = "wget -N #{new_files.join(' ')}"
     git = "git add . ; git commit -m '#{commit_message}'; git push origin master"
 
     status = system "#{cd}; #{wget}; #{git};"
