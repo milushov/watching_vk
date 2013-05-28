@@ -1,4 +1,4 @@
-%w(sinatra git execjs pry open-uri awesome_print json).each(&method(:require))
+%w(sinatra git execjs pry open-uri awesome_print json).each &method(:require)
 
 set :dev, false
 set :types, %w(js css)
@@ -10,17 +10,18 @@ set :state_file, "#{settings.root}/state.json"
 set :js_file, 'http://vk.com/js/loader_nav0_0.js'
 set :base, 'http://vk.me'
 set :vk_files_path, '../watching_vk_files/'
+set :github_repo_log, 'https://github.com/vkf/watching_vk_files/commits/master'
 set :paths, {
   '' => %w(mentions.js apps_flash.js map2.js map.css paginated_table.js paginated_table.css ui_controls.css touch.css),
   'lib' => %w(selects.js maps.js sort.js ui_controls.js),
   'api' => %w(oauth_popup.css oauth_page.css oauth_touch.css)
 }
 
-get '/' do
-  'this page should contain some stats from db'
+get '/?' do
+  redirect settings.github_repo_log
 end
 
-get '/dance_for_me/:password' do
+get '/check/:password' do
   #redirect '/' unless settings.password == params['password']
 
   files = get_files
@@ -42,18 +43,23 @@ get '/dance_for_me/:password' do
       new_files.to_s
     end
   end
+end
 
+get '/wget' do
+  new_files = get_files.map{ |arr| file_url arr.first }
+  "wget -N #{new_files.join(' ')}; count_files=#{new_files.count};"
 end
 
 helpers do
+  def file_url file_name
+    base = settings.base
+    type = settings.types.select{ |type| file_name.match(/\.(#{type})$/) }.first
+    path = (paths = settings.paths.select{|_, files| files.include? file_name }).empty? ? 'al' : paths.keys.first
+    File.join base, type, path, file_name
+  end
+
   def save_to_git new_files
-    new_files.map! do |arr|
-      file_name = arr.first
-      base = settings.base
-      type = settings.types.select{ |type| file_name.match(/\.(#{type})$/) }.first
-      path = (paths = settings.paths.select{|_, files| files.include? file_name }).empty? ? 'al' : paths.keys.first
-      File.join base, type, path, file_name
-    end
+    new_files.map!{ |arr| file_url arr.first }
 
     time = Time.now.strftime "%e.%m.%Y %-k:%M:%S"
     commit_message = "#{time} new files: #{new_files.count}"
@@ -62,9 +68,7 @@ helpers do
     wget = "wget -N #{new_files.join(' ')}"
     git = "git add . ; git commit -m '#{commit_message}'; git push origin master"
 
-    status = system "#{cd}; #{wget}; #{git};"
-
-    puts 'changes have been pushed to github!' if status
+    system "#{cd}; #{wget}; #{git};"
   end
 
   def get_files
