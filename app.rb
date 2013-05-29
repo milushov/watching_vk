@@ -4,7 +4,6 @@ set :dev, false
 set :types, %w(js css)
 
 set :root, File.dirname(__FILE__)
-set :password, ENV['WATCHING_VK_PASSWORD']
 set :state_file, "#{settings.root}/state.json"
 
 set :js_file, 'http://vk.com/js/loader_nav0_0.js'
@@ -21,9 +20,7 @@ get '/?' do
   redirect settings.github_repo_log
 end
 
-get '/check/:password' do
-  redirect '/' unless settings.password == params['password']
-
+get '/check' do
   files = get_files
   last_state = get_last_state
 
