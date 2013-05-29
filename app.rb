@@ -8,7 +8,7 @@ set :state_file, "#{settings.root}/state.json"
 
 set :js_file, 'http://vk.com/js/loader_nav0_0.js'
 set :base, 'http://vk.me'
-set :vk_files_path, '../watching_vk_files/'
+set :vk_files_path, File.expand_path('../watching_vk_files/', settings.root)
 set :github_repo_log, 'https://github.com/vkf/watching_vk_files/commits/master'
 set :paths, {
   '' => %w(mentions.js apps_flash.js map2.js map.css paginated_table.js paginated_table.css ui_controls.css touch.css),
