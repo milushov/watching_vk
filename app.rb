@@ -33,7 +33,11 @@ get '/check' do
     if new_files.empty?
       'new files is empty'
     else
-      set_last_state files
+      begin
+        set_last_state files
+      rescue => e
+        return e.message
+      end
       #save_updates new_files
       save_to_git new_files
 
@@ -55,8 +59,8 @@ helpers do
     File.join base, type, path, file_name
   end
 
-  def save_to_git new_files
-    new_files.map!{ |arr| file_url arr.first }
+  def save_to_git files
+    new_files = files.map{ |arr| file_url arr.first }
 
     time = Time.now.strftime "%e.%m.%Y %-k:%M:%S"
     commit_message = "#{time} new files: #{new_files.count}"
