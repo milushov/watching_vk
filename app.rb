@@ -21,28 +21,32 @@ get '/?' do
 end
 
 get '/check' do
-  files = get_files
-  last_state = get_last_state
+  begin
+    files = get_files
+    last_state = get_last_state
 
-  if last_state.empty?
-    set_last_state files
-    'last state is empty'
-  else
-    new_files = files.to_a - last_state.to_a
-
-    if new_files.empty?
-      'new files is empty'
+    if last_state.empty?
+      set_last_state files
+      'last state is empty'
     else
-      begin
-        set_last_state files
-      rescue => e
-        return e.message
-      end
-      #save_updates new_files
-      save_to_git new_files
+      new_files = files.to_a - last_state.to_a
 
-      new_files.to_s
+      if new_files.empty?
+        'new files is empty'
+      else
+        begin
+          set_last_state files
+        rescue => e
+          return e.message
+        end
+        #save_updates new_files
+        save_to_git new_files
+
+        new_files.to_s
+      end
     end
+  rescue => e
+    "fail: #{e.message}"
   end
 end
 
