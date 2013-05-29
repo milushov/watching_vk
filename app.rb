@@ -22,7 +22,7 @@ get '/?' do
 end
 
 get '/check/:password' do
-  #redirect '/' unless settings.password == params['password']
+  redirect '/' unless settings.password == params['password']
 
   files = get_files
   last_state = get_last_state
